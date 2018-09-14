@@ -108,6 +108,7 @@ public class Robot {
 	
 	public void fire() {
 		turretController.fire();
+		turretController.reload();
 	}
 	
 	public void reload() {

@@ -14,13 +14,15 @@ public class UltrasonicSensor implements RangeFinder{
 	public UltrasonicSensor(Port port) {
 		sensor = new NXTUltrasonicSensor(port);
 		sampleProvider = sensor.getDistanceMode();
-		sample = new float[sampleProvider.sampleSize()];
+		sample = new float[3];
 	}
 
 	@Override
 	public float getRange() {
 		sampleProvider.fetchSample(sample, 0);
-		return sample[0];
+		sampleProvider.fetchSample(sample, 1);
+		sampleProvider.fetchSample(sample, 2);
+		return (sample[0] + sample[1] + sample[2]) / 3;
 	}
 
 	@Override

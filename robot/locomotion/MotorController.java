@@ -1,16 +1,19 @@
 package shooterbot.robot.locomotion;
 
+import lejos.hardware.motor.BaseRegulatedMotor;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.MotorPort;
 
 public class MotorController {
 
-	DriveMotor leftDriveMotor;
-	DriveMotor rightDriveMotor;
+	EV3LargeRegulatedMotor leftDriveMotor;
+	EV3LargeRegulatedMotor rightDriveMotor;
 	
 	public MotorController(){
-		leftDriveMotor = new DriveMotor(MotorPort.A);
-		rightDriveMotor = new DriveMotor(MotorPort.B);
-		leftDriveMotor.synchronizeWith(rightDriveMotor);
+		leftDriveMotor = new EV3LargeRegulatedMotor(MotorPort.A);
+		rightDriveMotor = new EV3LargeRegulatedMotor(MotorPort.B);
+		BaseRegulatedMotor[] array = {rightDriveMotor};
+		leftDriveMotor.synchronizeWith(array);
 	}
 	
 	public void halt() {
