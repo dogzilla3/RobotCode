@@ -53,6 +53,7 @@ public class Main {
 		shooterBot.runBehavior();
 		
 		Button.waitForAnyPress();
+		
 	}
 
 }
