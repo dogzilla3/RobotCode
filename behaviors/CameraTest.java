@@ -100,44 +100,56 @@ public class CameraTest extends Behavior{
 
 			vid.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, 120);
 
+		
+			vid.release();
 			vid.open(0);
 
-			robot.say("Camera open");   
-			
-			Mat bgrImage = new Mat();
-
-			vid.read(bgrImage);     
-
-			Mat hsvImage = new Mat();
-			
-			// Convert input image to HSV
-			Imgproc.cvtColor(bgrImage, hsvImage, Imgproc.COLOR_BGR2HSV);
-			
-			Mat lower_red_hue_range = new Mat();
-			Mat upper_red_hue_range = new Mat();
-			Core.inRange(hsvImage, new Scalar(0.0, 100.0, 100.0), new Scalar(10.0, 255.0, 255.0), lower_red_hue_range);
-			Core.inRange(hsvImage, new Scalar(160.0, 100.0, 100.0), new Scalar(179.0, 255.0, 255.0), upper_red_hue_range);
-			
-			Mat red_hue_image = new Mat();
-			Core.addWeighted(lower_red_hue_range, 1.0, upper_red_hue_range, 1.0, 0.0, red_hue_image);
-			Imgproc.GaussianBlur(red_hue_image, red_hue_image, new Size(9, 9), 2, 2);
-			
+			robot.say("Camera open"); 
 			
 			Mat circles = new Mat();
-			Imgproc.HoughCircles(red_hue_image, circles, Imgproc.CV_HOUGH_GRADIENT, 1, red_hue_image.rows()/8, 100, 20, 0, 0);
-			//std::vector<cv::Vec3f> circles;
-			//4 	cv::HoughCircles(red_hue_image, circles, CV_HOUGH_GRADIENT, 1, red_hue_image.rows/8, 100, 20, 0, 0);
-			//::Mat red_hue_image;
-			//cv::addWeighted(lower_red_hue_range, 1.0, upper_red_hue_range, 1.0, 0.0, red_hue_image);
-			//cv::GaussianBlur(red_hue_image, red_hue_image, cv::Size(9, 9), 2, 2);
-			
-			if(!circles.empty()) {
-				robot.say(circles.toString());
-			}
-			else {
-				robot.say("No circle found");
+			Mat bgrImage = new Mat();
+			boolean running = true;
+			while(running) {
+				vid.read(bgrImage);     
+
+				Mat hsvImage = new Mat();
+				
+				// Convert input image to HSV
+				Imgproc.cvtColor(bgrImage, hsvImage, Imgproc.COLOR_BGR2HSV);
+				
+				Mat lower_red_hue_range = new Mat();
+				Mat upper_red_hue_range = new Mat();
+				Core.inRange(hsvImage, new Scalar(0.0, 100.0, 100.0), new Scalar(10.0, 255.0, 255.0), lower_red_hue_range);
+				Core.inRange(hsvImage, new Scalar(160.0, 100.0, 100.0), new Scalar(179.0, 255.0, 255.0), upper_red_hue_range);
+				
+				Mat red_hue_image = new Mat();
+				Core.addWeighted(lower_red_hue_range, 1.0, upper_red_hue_range, 1.0, 0.0, red_hue_image);
+				Imgproc.GaussianBlur(red_hue_image, red_hue_image, new Size(9, 9), 2, 2);
+				
+				
+
+				Imgproc.HoughCircles(red_hue_image, circles, Imgproc.CV_HOUGH_GRADIENT, 1, red_hue_image.rows()/8, 100, 20, 0, 0);
+				
+				if(!circles.empty()) {
+					robot.say("Circles: " + circles.cols());
+				}
+				else {
+					robot.say("No circle found");
+				}
+				if(Button.ENTER.isDown()) {
+					running = false;
+				}
+				if(circles.cols() >= 6) {
+					running = false;
+				}
+				circles = new Mat();
 			}
 
+			
+			vid.release();
+
+			//robot.say("Passed the camera code");
+			
 			/*if (!hsvImage.empty()) {
 				robot.say("Image Captured");
 	            Delay.msDelay(5000);
@@ -190,8 +202,8 @@ public class CameraTest extends Behavior{
                 vSum = 0;
             }
             
-            wc.close();*/
-        /*} catch (IOException ioe) {
+            wc.close();
+        } catch (IOException ioe) {
             ioe.printStackTrace();
             robot.say("You messed up a a ron");
             System.out.println("Driver exception: " + ioe.getMessage());
