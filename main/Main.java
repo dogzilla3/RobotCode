@@ -11,49 +11,40 @@ import shooterbot.robot.Robot;
 public class Main {
 	
 	public static void main(String[] args) {
+		
+		////This line has to be the first line in the program!!!//////
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		//Initialize the robot
 		Robot shooterBot = new Robot();
 		
 		//Initialize the behaviors that the robot will do
-		Behavior helloWorld = new HelloWorldBehavior(shooterBot);
-		Behavior motorTest = new MotorTestBehavior(shooterBot);
-		Behavior shootStuff = new ShootStuffBehavior(shooterBot);
-		Behavior oldOne = new OurOldBehavior(shooterBot);
-		Behavior mattsCode = new MattsBehavior(shooterBot);
-		Behavior cameraTest = new CameraTest(shooterBot);
+		CameraTestRefactor cameraTestRefactor = new CameraTestRefactor(shooterBot);
 		
 		//Setup the screen to start on button press
 		LCD.clear();	
-		Button.LEDPattern(4);
+		Button.LEDPattern(1);
 		Sound.beepSequenceUp();
 		LCD.drawString("Program Start!", 1, 1);
+		LCD.drawString("Press any key to begin", 1, 2);	
+		Button.waitForAnyPress();
+
+		shooterBot.changeBehavior(cameraTestRefactor);
+		
+		cameraTestRefactor.startCamera();
+		
+		while(true) {
+			if(Button.ESCAPE.isDown()) {
+				cameraTestRefactor.stopService();
+				break;
+			}
+		}
+		
+		
+		Button.LEDPattern(2);
+		Sound.beepSequence();
+		LCD.drawString("Program end!", 1, 1);
 		LCD.drawString("Press any key to begin", 1, 2);
-			
 		Button.waitForAnyPress();
-		
-		//-----Test Behaviors-----
-		
-		//Change the behavior to hello world and execute
-		/*shooterBot.changeBehavior(helloWorld);
-		shooterBot.runBehavior();*/
-		
-		//Change the behavior to motor test and execute
-		/*shooterBot.changeBehavior(motorTest);
-		shooterBot.runBehavior();
-		
-		//Change the behavior to shoot stuff and execute
-		shooterBot.changeBehavior(shootStuff);
-		shooterBot.runBehavior();*/
-		
-		//shooterBot.changeBehavior(mattsCode);
-		//shooterBot.runBehavior();
-		
-		shooterBot.changeBehavior(cameraTest);
-		shooterBot.runBehavior();
-		
-		Button.waitForAnyPress();
-		
 	}
 
 }

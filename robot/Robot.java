@@ -1,9 +1,13 @@
 package shooterbot.robot;
 
+
 //Lejos imports
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.SensorPort;
 import shooterbot.behaviors.Behavior;
+import lejos.hardware.Button;
+import lejos.hardware.Sound;
+
 //Regular imports
 import shooterbot.robot.locomotion.MotorController;
 import shooterbot.robot.sensors.UltrasonicSensor;
@@ -86,7 +90,7 @@ public class Robot {
 	}
 	
 	public void say(String message) {
-		LCD.clear();
+		LCD.clearDisplay();
 		LCD.drawString(message, 1, 1);
 	}
 	
@@ -95,6 +99,23 @@ public class Robot {
 		for (int i=0; i < messages.length; i++) { 
 			LCD.drawString(messages[i], 1, i+1);
 		}
+	}
+	
+	public static enum Sounds{
+		UP,
+		DOWN;
+	}
+	
+	public void Beep(Sounds sound) {
+        switch (sound) { 
+        case UP: Sound.beepSequenceUp(); break; 
+        case DOWN: Sound.beepSequence(); break; 
+        default: Sound.beep(); break; 
+        } 
+	}
+	
+	public void Beep() {
+		Sound.beep();
 	}
 	
 	public float findRangeToObject() {
@@ -113,5 +134,13 @@ public class Robot {
 	
 	public void reload() {
 		turretController.reload();
+	}
+	
+	public void Debug(String message) {
+		LCD.clearDisplay();
+		say(message);
+		Button.LEDPattern(9);
+		Button.waitForAnyPress();
+		Button.LEDPattern(1);
 	}
 }
