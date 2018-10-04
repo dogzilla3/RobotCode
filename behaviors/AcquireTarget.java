@@ -25,6 +25,7 @@ public class AcquireTarget extends Behavior {
 		super(robot);
 		delay = 350;
 		circleContainer = new Mat();
+		Robot.playSound(Robot.Wav.SEARCHING);
 	}
 
 	/*

@@ -37,6 +37,7 @@ public class CenterCircle extends Behavior {
 		super(robot);
 		circleContainer = new Mat();
 		this.inRange = inRange;
+		Robot.playSound(Robot.Wav.CENTERING);
 	}
 
 	/*

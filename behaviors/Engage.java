@@ -11,7 +11,8 @@ import shooterbot.robot.Robot;
 public class Engage extends Behavior{
 
 	public Engage(Robot robot) {
-		super(robot);	
+		super(robot);
+		Robot.playSound(Robot.Wav.ENGAGING);
 	}
 
 	@Override

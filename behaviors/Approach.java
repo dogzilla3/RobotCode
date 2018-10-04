@@ -23,6 +23,7 @@ public class Approach extends Behavior {
 		super(robot);
 		inRange = false;
 		moving = true;
+		Robot.playSound(Robot.Wav.APPROACHING);
 	}
 
 	/*
