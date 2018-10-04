@@ -17,18 +17,36 @@ public class Main {
 	public static boolean executeProgram = true;
 	
 	public static void main(String[] args) {
-		////This line has to be the first line in the program!!!//////
+		
+		////This line has to be the first line in the program!!!////
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		//Initialize the robot
-		Robot bot = new Robot();
+		Robot robot = new Robot();
 		
 		//Initialize the start behavior 
-		//CameraTestRefactor cameraTestRefactor = new CameraTestRefactor(shooterBot);
+		Behavior acquireTarget = (Behavior) new AcquireTarget(robot);
 		
-		File soundFile = new File("assets/test.wav");
+		//Initialize the behavior of the robot
+		robot.changeBehavior(acquireTarget);
 		
 		//Setup the screen to start on button press
+		displayStartScreen();
+
+		//Main loop of program
+		while(executeProgram || !Button.ESCAPE.isDown()) {
+			robot.runBehavior();
+		}
+	
+		displayEndScreen();
+	}
+		
+	/*
+	 *  Requires user input to start the program
+	 *  This is to make sure the robot is ready
+	 *  to begin
+	 */  
+	private static void displayStartScreen() {
 		LCD.clear();	
 		Button.LEDPattern(1);
 		Sound.beepSequenceUp();
@@ -36,24 +54,22 @@ public class Main {
 		LCD.drawString("Press any key to begin", 1, 2);	
 		Button.waitForAnyPress();
 		LCD.clearDisplay();
-
-		//Old camera code
-		int delay = 350;
-
-		//Main loop of program
-		while(executeProgram || !Button.ESCAPE.isDown()) {
-			
-		}
-
+	}
+	
+	/*
+	 *  Signals the end of the program
+	 */  
+	private static void displayEndScreen() {
+		Button.LEDPattern(2);
+		Sound.beepSequence();
+		Button.waitForAnyPress();
+	}
+	
+	private void holdsAllOurStupidShit() {
 		while(true) {
-			if(soundFile.exists()) {
-				Robot.playSound(soundFile);
-			} else {
-				Robot.beep();
-				Robot.beep();
-				Robot.beep();
-				Robot.beep();
-			}
+			int delay = 350;
+			Robot bot = new Robot();
+
 			
 			
 			Mat circles = new Mat();
@@ -61,6 +77,7 @@ public class Main {
 			
 
 			while(circles.empty()) {
+
 				bot.rotateLeft(delay);
 				for (int i = 0; i < 4; i++) {
 					System.gc();
@@ -136,20 +153,17 @@ public class Main {
 		//Mat circles = shooterBot.getCircles();
 		//shooterBot.say("" + circles.cols());
 		
-		/*if(circles.empty()) {
+		if(circles.empty()) {
 			aquireTarget.aquire();
 			do {
 				circles = shooterBot.getCircles();
 			}while(circles.empty());
 			aquireTarget.aquired();
-		}*/
+		}
 		
 		
-		/*Button.LEDPattern(2);
+		Button.LEDPattern(2);
 		Sound.beepSequence();
 		Button.waitForAnyPress();*/
-		
-		
 	}
-
 }

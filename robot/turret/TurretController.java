@@ -2,10 +2,18 @@ package shooterbot.robot.turret;
 
 import lejos.hardware.port.MotorPort;
 
+/*
+ *  Turret controller controls the firing mechanism
+ */  
 public class TurretController {
 
+	//Reference to the motor
 	private TurretMotor turretMotor;
-	public static final int INITAL_AMMO = 10;
+	
+	//Constant that dictates the amount of ammo the robot has initially
+	public final int INITAL_AMMO = 10;
+	
+	//Real world ammo count
 	int ammo;
 	
 	public TurretController() {
@@ -18,12 +26,11 @@ public class TurretController {
 		if(ammo > 0) {
 			turretMotor.rotate(-95);
 			ammo--;
+			turretMotor.rotate(95);
 		}
 	}
 	
-	public void reload() {
-		if(ammo >= 0) {
-			turretMotor.rotate(95);
-		}
+	public int getAmmo() {
+		return ammo;
 	}
 }

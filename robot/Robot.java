@@ -55,13 +55,28 @@ public class Robot {
 	//A reference to camera
 	private Camera camera;
 	
-
+	private static File searchingSound = new File("/home/lejos/programs/Searching.wav");
+	private static File centeringSound = new File("/home/lejos/programs/Centering.wav");
+	private static File approachingSound = new File("/home/lejos/programs/Approaching.wav");
+	private static File engagingSound = new File("/home/lejos/programs/Engaging.wav");
 	
+	public static enum Sounds{
+		UP,
+		DOWN;
+	}
+	
+	public static enum Wav{
+		SEARCHING,
+		CENTERING,
+		APPROACHING,
+		ENGAGING;
+	}
 	/* 
 	 * The robot constructor sets up the parts of our robot
 	 * - Motor Controller
-	 * - Ultrasonic sensor
 	 * - Turret Controller
+	 * - Ultrasonic sensor
+	 * - Camera
 	 */
 	public Robot(){
 		this.motorController = new MotorController();
@@ -69,6 +84,8 @@ public class Robot {
 		this.turretController = new TurretController(); 
 		this.camera = new Camera();
 	}
+	
+	
 	
 	public void runBehavior() {
 		if(behavior != null) {
@@ -88,6 +105,10 @@ public class Robot {
 	
 	public void moveBackward() {
 		motorController.backward();
+	}
+	
+	public void halt() {
+		motorController.halt();
 	}
 	
 	public void rotateLeft() {
@@ -110,10 +131,6 @@ public class Robot {
 		motorController.halt();
 	}
 	
-	public void halt() {
-		motorController.halt();
-	}
-	
 	public static void say(String message) {
 		LCD.clearDisplay();
 		LCD.drawString(message, 1, 1);
@@ -125,13 +142,9 @@ public class Robot {
 			LCD.drawString(messages[i], 1, i+1);
 		}
 	}
+
 	
-	public static enum Sounds{
-		UP,
-		DOWN;
-	}
-	
-	public void Beep(Sounds sound) {
+	public void beep(Sounds sound) {
         switch (sound) { 
         case UP: Sound.beepSequenceUp(); break; 
         case DOWN: Sound.beepSequence(); break; 
@@ -154,11 +167,6 @@ public class Robot {
 	
 	public void fire() {
 		turretController.fire();
-		turretController.reload();
-	}
-	
-	public void reload() {
-		turretController.reload();
 	}
 	
 	public static void debug(String message) {
@@ -170,11 +178,21 @@ public class Robot {
 		Button.LEDPattern(1);
 	}
 	
-	public static void playSound(File soundFile) {
-		Sound.playSample(soundFile, Sound.VOL_MAX);
+	public static void playSound(Wav wav) {
+		switch(wav) {
+			case SEARCHING: Sound.playSample(searchingSound, Sound.VOL_MAX); break; 
+	        case CENTERING: Sound.playSample(centeringSound, Sound.VOL_MAX); break; 
+			case APPROACHING: Sound.playSample(approachingSound, Sound.VOL_MAX); break; 
+	        case ENGAGING: Sound.playSample(engagingSound, Sound.VOL_MAX); break; 
+	        default: Sound.beep(); break; 
+		}
 	}
 	
 	public Mat getCircles() {
 		return camera.getCircles();
+	}
+	
+	public int getAmmo() {
+		return turretController.getAmmo();
 	}
 }

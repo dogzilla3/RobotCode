@@ -61,6 +61,9 @@ public class Camera {
 	 */
 	int maxRadius  = 0;
 	
+	/*
+	 *  Constructor sets up the camera and initializes the member variables
+	 */
 	public Camera() {
 		capture = new VideoCapture();
 		cameraActive = false;
@@ -74,13 +77,20 @@ public class Camera {
 		rawCameraImage = new Mat();
 	}
 	
+	/*
+	 *  Gets an image, processes it, and returns any circles found
+	 */
 	public Mat getCircles() {
+		//Check the camera four times
 		for(int i = 0; i < cameraCycles; i++) {
+			
+			//Start the camera
 			startAcquisition();
+			
 			// check if the capture is open
 			if (this.capture.isOpened()) {
 				try {
-					long startTime = System.nanoTime();
+
 					// read the current frame
 					this.capture.read(rawCameraImage);
 					
@@ -98,31 +108,22 @@ public class Camera {
 					System.err.println("Exception during the image elaboration: " + e);
 				}
 			}
+			
+			//Stop the camera
 			stopAcquisition();
 		}
+		
+		//Release the matrices
 		realeaseAllMats();
+		
+		//return the circles
 		return circleContainer;
 	}
 	
 	
-	public void startAcquisition() {
-		if (!this.cameraActive) {
-			// start the video capture
-			this.capture.open(cameraId);
-			capture.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, 640);
-			capture.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, 480);
-			this.cameraActive = true;
-		}
-	}
-	
-	private void stopAcquisition() {		
-		if (this.capture.isOpened()) {
-			// release the camera
-			this.capture.release();
-			this.cameraActive = false;
-		}
-	}
-	
+	/*
+	 *  Helper function that processes an image finding any circles
+	 */
 	private void processImage(Mat rawCameraImage) {
 		//Blur original image to reduce noise
 		Imgproc.medianBlur(rawCameraImage, rawCameraImage, 7);
@@ -142,13 +143,9 @@ public class Camera {
 		Imgproc.HoughCircles(red_hue_image, circleContainer, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, param1, param2, minRadius, maxRadius);
 	}
 	
-	private void realeaseAllMats() {
-		lower_red_hue_range.release();
-		upper_red_hue_range.release();
-		red_hue_image.release();
-		hsvImage.release();
-	}
-	
+	/*
+	 *  Helper function that prints frame and circle data to lcd screen
+	 */
 	private void printCircles(int frame) {
 		double[] circle = circleContainer.get(0, 0);
 		if(!circleContainer.empty()) {
@@ -156,5 +153,40 @@ public class Camera {
 		} else {
 			Robot.say("Frame: " + (frame + 1));
 		}
+	}
+	
+	/*
+	 *  Starts the camera
+	 */
+	public void startAcquisition() {
+		if (!this.cameraActive) {
+			// start the video capture
+			this.capture.open(cameraId);
+			capture.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, 640);
+			capture.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, 480);
+			this.cameraActive = true;
+		}
+	}
+	
+	/*
+	 *  Stops the camera
+	 */
+	private void stopAcquisition() {		
+		if (this.capture.isOpened()) {
+			// release the camera
+			this.capture.release();
+			this.cameraActive = false;
+		}
+	}
+	
+	/*
+	 *  Releases all matrices, this is to avoid memory leaks. 
+	 *  See garbage collection issue with Mats and opencv
+	 */
+	private void realeaseAllMats() {
+		lower_red_hue_range.release();
+		upper_red_hue_range.release();
+		red_hue_image.release();
+		hsvImage.release();
 	}
 }
