@@ -1,36 +1,38 @@
 package shooterbot.behaviors;
 
-
-
-import java.io.IOException;
-import java.util.Vector;
-
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfFloat4;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
-import lejos.hardware.video.Video;
-import lejos.hardware.video.YUYVImage;
 import lejos.utility.Delay;
 import shooterbot.robot.Robot;
-import lejos.hardware.BrickFinder;
-import lejos.hardware.Button;
-import lejos.hardware.lcd.GraphicsLCD;
 
 public class CameraTest extends Behavior{
 
+	public VideoCapture vid;
 	public CameraTest(Robot robot) {
 		super(robot);
 		// TODO Auto-generated constructor stub
 		
 	}
+	
+	public void initialize() {
+		vid = new VideoCapture();
+		vid.open(-1);
+		Robot.debug("isOpen" + vid.isOpened());
+		vid.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, 160);
+		vid.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, 120);
+		Robot.say("Initializing...");
+		Delay.msDelay(3000);
+	}
 
+	public void stop() {
+		vid.release();
+	}
 	@Override
 	public void run() {
 		/*VideoCapture vid = new VideoCapture(0);
@@ -54,7 +56,7 @@ public class CameraTest extends Behavior{
 
 		}*/
 		
-		robot.say("Uncomment the selfie code!");
+		Robot.say("Uncomment the selfie code!");
 		
 		/*try {
             Video wc = BrickFinder.getDefault().getVideo();
@@ -94,59 +96,44 @@ public class CameraTest extends Behavior{
         }*/
 		
 		//try {
-			VideoCapture vid = new VideoCapture(0);
+		Robot.debug("Before video code");
 
-			vid.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, 160);
 
-			vid.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, 120);
-
-		
-			vid.release();
-			vid.open(0);
-
-			robot.say("Camera open"); 
+			Robot.say("Camera open"); 
 			
 			Mat circles = new Mat();
 			Mat bgrImage = new Mat();
-			boolean running = true;
-			while(running) {
+			Robot.debug("isOpen" + vid.isOpened());
 				vid.read(bgrImage);     
 
 				Mat hsvImage = new Mat();
 				
 				// Convert input image to HSV
-				Imgproc.cvtColor(bgrImage, hsvImage, Imgproc.COLOR_BGR2HSV);
-				
-				Mat lower_red_hue_range = new Mat();
-				Mat upper_red_hue_range = new Mat();
-				Core.inRange(hsvImage, new Scalar(0.0, 100.0, 100.0), new Scalar(10.0, 255.0, 255.0), lower_red_hue_range);
-				Core.inRange(hsvImage, new Scalar(160.0, 100.0, 100.0), new Scalar(179.0, 255.0, 255.0), upper_red_hue_range);
-				
-				Mat red_hue_image = new Mat();
-				Core.addWeighted(lower_red_hue_range, 1.0, upper_red_hue_range, 1.0, 0.0, red_hue_image);
-				Imgproc.GaussianBlur(red_hue_image, red_hue_image, new Size(9, 9), 2, 2);
-				
-				
+				if(!bgrImage.empty()) {
+					Robot.debug("The image is not empty");
+					Imgproc.cvtColor(bgrImage, hsvImage, Imgproc.COLOR_BGR2HSV);
+					
+					Mat lower_red_hue_range = new Mat();
+					Mat upper_red_hue_range = new Mat();
+					Core.inRange(hsvImage, new Scalar(0.0, 100.0, 100.0), new Scalar(10.0, 255.0, 255.0), lower_red_hue_range);
+					Core.inRange(hsvImage, new Scalar(160.0, 100.0, 100.0), new Scalar(179.0, 255.0, 255.0), upper_red_hue_range);
+					
+					Mat red_hue_image = new Mat();
+					Core.addWeighted(lower_red_hue_range, 1.0, upper_red_hue_range, 1.0, 0.0, red_hue_image);
+					Imgproc.GaussianBlur(red_hue_image, red_hue_image, new Size(9, 9), 2, 2);
+					
+					
 
-				Imgproc.HoughCircles(red_hue_image, circles, Imgproc.CV_HOUGH_GRADIENT, 1, red_hue_image.rows()/8, 100, 20, 0, 0);
-				
-				if(!circles.empty()) {
-					robot.say("Circles: " + circles.cols());
-				}
-				else {
-					robot.say("No circle found");
-				}
-				if(Button.ENTER.isDown()) {
-					running = false;
-				}
-				if(circles.cols() >= 6) {
-					running = false;
-				}
-				circles = new Mat();
+					Imgproc.HoughCircles(red_hue_image, circles, Imgproc.CV_HOUGH_GRADIENT, 1, red_hue_image.rows()/8, 100, 20, 0, 0);
+					
+					if(!circles.empty()) {
+						Robot.say("Circles: " + circles.cols());
+					}
+					else {
+						Robot.say("No circle found");
+					}
+					circles = new Mat();
 			}
-
-			
-			vid.release();
 
 			//robot.say("Passed the camera code");
 			
@@ -159,7 +146,7 @@ public class CameraTest extends Behavior{
 				robot.say("Image Not Captured");
 			}
 			
-			vid.release();
+
 			
             /*Video wc = BrickFinder.getDefault().getVideo();
             

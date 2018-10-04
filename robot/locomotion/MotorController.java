@@ -25,15 +25,15 @@ public class MotorController {
 	
 	public void rotateLeft() {
 		leftDriveMotor.startSynchronization();
-		leftDriveMotor.forward();
-		rightDriveMotor.backward();
+		leftDriveMotor.backward();
+		rightDriveMotor.forward();
 		leftDriveMotor.endSynchronization();
 	}
 	
 	public void rotateRight() {
 		leftDriveMotor.startSynchronization();
-		leftDriveMotor.backward();
-		rightDriveMotor.forward();
+		leftDriveMotor.forward();
+		rightDriveMotor.backward();
 		leftDriveMotor.endSynchronization();
 	}
 	

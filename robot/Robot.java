@@ -4,12 +4,19 @@ package shooterbot.robot;
 //Lejos imports
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.SensorPort;
+import lejos.utility.Delay;
 import shooterbot.behaviors.Behavior;
+
+import java.io.File;
+
+import org.opencv.core.Mat;
+
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 
 //Regular imports
 import shooterbot.robot.locomotion.MotorController;
+import shooterbot.robot.sensors.Camera;
 import shooterbot.robot.sensors.UltrasonicSensor;
 import shooterbot.robot.turret.TurretController;
 
@@ -45,6 +52,11 @@ public class Robot {
 	//A reference to the current behavior
 	private Behavior behavior;
 	
+	//A reference to camera
+	private Camera camera;
+	
+
+	
 	/* 
 	 * The robot constructor sets up the parts of our robot
 	 * - Motor Controller
@@ -55,6 +67,7 @@ public class Robot {
 		this.motorController = new MotorController();
 		this.ultrasonicSensor = new UltrasonicSensor(SensorPort.S1);
 		this.turretController = new TurretController(); 
+		this.camera = new Camera();
 	}
 	
 	public void runBehavior() {
@@ -85,16 +98,28 @@ public class Robot {
 		motorController.rotateRight();
 	}
 	
+	public void rotateLeft(int delay) {
+		motorController.rotateLeft();
+		Delay.msDelay(delay);
+		motorController.halt();
+	}
+	
+	public void rotateRight(int delay) {
+		motorController.rotateRight();
+		Delay.msDelay(delay);
+		motorController.halt();
+	}
+	
 	public void halt() {
 		motorController.halt();
 	}
 	
-	public void say(String message) {
+	public static void say(String message) {
 		LCD.clearDisplay();
 		LCD.drawString(message, 1, 1);
 	}
 	
-	public void say(String[] messages) {
+	public static void say(String[] messages) {
 		LCD.clear();
 		for (int i=0; i < messages.length; i++) { 
 			LCD.drawString(messages[i], 1, i+1);
@@ -114,7 +139,7 @@ public class Robot {
         } 
 	}
 	
-	public void Beep() {
+	public static void beep() {
 		Sound.beep();
 	}
 	
@@ -136,11 +161,20 @@ public class Robot {
 		turretController.reload();
 	}
 	
-	public void Debug(String message) {
+	public static void debug(String message) {
 		LCD.clearDisplay();
+		Sound.beep();
 		say(message);
 		Button.LEDPattern(9);
 		Button.waitForAnyPress();
 		Button.LEDPattern(1);
+	}
+	
+	public static void playSound(File soundFile) {
+		Sound.playSample(soundFile, Sound.VOL_MAX);
+	}
+	
+	public Mat getCircles() {
+		return camera.getCircles();
 	}
 }

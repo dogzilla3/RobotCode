@@ -5,7 +5,7 @@ import lejos.hardware.port.MotorPort;
 public class TurretController {
 
 	private TurretMotor turretMotor;
-	public static final int INITAL_AMMO = 3;
+	public static final int INITAL_AMMO = 10;
 	int ammo;
 	
 	public TurretController() {
@@ -16,12 +16,14 @@ public class TurretController {
 	
 	public void fire() {
 		if(ammo > 0) {
-			turretMotor.rotate(-100);
+			turretMotor.rotate(-95);
 			ammo--;
 		}
 	}
 	
 	public void reload() {
-		turretMotor.rotate(100);
+		if(ammo >= 0) {
+			turretMotor.rotate(95);
+		}
 	}
 }
