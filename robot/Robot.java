@@ -1,24 +1,20 @@
 package shooterbot.robot;
 
 
-//Lejos imports
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.SensorPort;
+import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.utility.Delay;
-import shooterbot.behaviors.Behavior;
-
-import java.io.File;
-
-import org.opencv.core.Mat;
-
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
-
-//Regular imports
+import shooterbot.behaviors.Behavior;
 import shooterbot.robot.locomotion.MotorController;
 import shooterbot.robot.sensors.Camera;
 import shooterbot.robot.sensors.UltrasonicSensor;
 import shooterbot.robot.turret.TurretController;
+import java.io.File;
+import org.opencv.core.Mat;
+
 
 public class Robot {
 	
@@ -47,18 +43,17 @@ public class Robot {
 	private TurretController turretController;
 	
 	//The Ultrasonic sensor
-	private UltrasonicSensor ultrasonicSensor;
+	private EV3ColorSensor ultrasonicSensor;
 	
 	//A reference to the current behavior
 	private Behavior behavior;
 	
 	//A reference to camera
 	private Camera camera;
-	
-	private static File searchingSound = new File("/home/lejos/programs/Searching.wav");
-	private static File centeringSound = new File("/home/lejos/programs/Centering.wav");
-	private static File approachingSound = new File("/home/lejos/programs/Approaching.wav");
-	private static File engagingSound = new File("/home/lejos/programs/Engaging.wav");
+	private static File searchingSound = new File("zSearching.wav");
+	private static File centeringSound = new File("zCentering.wav");
+	private static File approachingSound = new File("zApproaching.wav");
+	private static File engagingSound = new File("zEngaging.wav");
 	
 	public static enum Sounds{
 		UP,
@@ -80,8 +75,8 @@ public class Robot {
 	 */
 	public Robot(){
 		this.motorController = new MotorController();
-		this.ultrasonicSensor = new UltrasonicSensor(SensorPort.S1);
-		this.turretController = new TurretController(); 
+		//this.ultrasonicSensor = new EV3ColorSensor(SensorPort.S1);
+		//this.turretController = new TurretController(); 
 		this.camera = new Camera();
 	}
 	
@@ -132,14 +127,16 @@ public class Robot {
 	}
 	
 	public static void say(String message) {
-		LCD.clearDisplay();
-		LCD.drawString(message, 1, 1);
+		System.out.println(message);
+		clearDisplay(7);
 	}
 	
 	public static void say(String[] messages) {
-		LCD.clear();
 		for (int i=0; i < messages.length; i++) { 
-			LCD.drawString(messages[i], 1, i+1);
+			System.out.println("- " + messages[i]);
+		}
+		if(8 - messages.length > 0) {
+			clearDisplay(8 - messages.length);
 		}
 	}
 
@@ -157,12 +154,12 @@ public class Robot {
 	}
 	
 	public float findRangeToObject() {
-		return ultrasonicSensor.getRange();
+		return 1f;
 	}
 	
 	
 	public float[] findMultipleRanges() {
-		return ultrasonicSensor.getRanges();
+		return new float[3];
 	}
 	
 	public void fire() {
@@ -194,5 +191,11 @@ public class Robot {
 	
 	public int getAmmo() {
 		return turretController.getAmmo();
+	}
+	
+	public static void clearDisplay(int lines) {
+		for (int i=0; i < lines; i++) { 
+			System.out.println("");
+		}
 	}
 }

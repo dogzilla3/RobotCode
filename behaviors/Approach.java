@@ -1,6 +1,8 @@
 
 package shooterbot.behaviors;
 
+import org.opencv.core.Mat;
+
 import shooterbot.robot.Robot;
 
 
@@ -10,19 +12,14 @@ import shooterbot.robot.Robot;
  */  
 public class Approach extends Behavior {
 
-	//Boolean that describes if the robot is inRange of a circle
-	private boolean inRange;
-	
-	//Boolean that describes whether the robot is moving or not
-	private boolean moving;
+	//Container for circles
+	private Mat circleContainer;
 	
 	/*
 	 *  Constructor initializes the behavior
 	 */  
 	public Approach(Robot robot) {
 		super(robot);
-		inRange = false;
-		moving = true;
 		Robot.playSound(Robot.Wav.APPROACHING);
 	}
 
@@ -33,15 +30,23 @@ public class Approach extends Behavior {
 	 */  
 	@Override
 	public void run() {
-		if(robot.findRangeToObject() != Float.POSITIVE_INFINITY) {
+		float range = robot.findRangeToObject();
+		Robot.say("" + range);
+		if(range != Float.POSITIVE_INFINITY) {
 			robot.halt();
-			moving = false;
-			inRange = true;		
-			robot.changeBehavior(new CenterCircle(robot, true));
-		} else if(moving == false && inRange == false) {
+			circleContainer = robot.getCircles();
+			if(!circleContainer.empty()) {
+				robot.halt();
+				robot.changeBehavior(new CenterCircle(robot, true, circleContainer));
+			} else {
+				robot.halt();
+				robot.changeBehavior(new AcquireTarget(robot));
+			}
+
+		}else {
 			robot.moveForward();
-			moving = true;
-		}		
+		}
+		
 	}
 
 }

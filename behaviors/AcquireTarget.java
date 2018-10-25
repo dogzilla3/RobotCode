@@ -43,7 +43,7 @@ public class AcquireTarget extends Behavior {
 		//If there is a circle change the robot behavior
 		if(!circleContainer.empty()) {
 			//Center Circle with the inRange Flag false
-			robot.changeBehavior(new CenterCircle(robot, false));
+			robot.changeBehavior(new CenterCircle(robot, false, circleContainer));
 		}
 		
 		//Release the matrix due to the Mat memory leak, itll get gcd in the main loop

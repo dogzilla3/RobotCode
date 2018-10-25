@@ -1,12 +1,14 @@
 package shooterbot.robot.sensors;
 
 import lejos.hardware.port.Port;
+import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.NXTUltrasonicSensor;
 import lejos.robotics.RangeFinder;
 import lejos.robotics.SampleProvider;
 
 public class UltrasonicSensor implements RangeFinder{
 	
+	EV3ColorSensor colorSensor;
 	NXTUltrasonicSensor sensor;
 	SampleProvider sampleProvider;
 	float[] sample;

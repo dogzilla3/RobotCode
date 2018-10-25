@@ -9,6 +9,10 @@ import org.opencv.core.Point;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
+import lejos.hardware.port.SensorPort;
+import lejos.ev3.tools.EV3Console;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.SensorMode;
 import shooterbot.behaviors.*;
 import shooterbot.robot.Robot;
 
@@ -17,25 +21,40 @@ public class Main {
 	public static boolean executeProgram = true;
 	
 	public static void main(String[] args) {
-		
 		////This line has to be the first line in the program!!!////
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		
+		//Setup the screen to start on button press
+		displayStartScreen();
 		
 		//Initialize the robot
 		Robot robot = new Robot();
 		
 		//Initialize the start behavior 
-		Behavior acquireTarget = (Behavior) new AcquireTarget(robot);
+		//Behavior acquireTarget = (Behavior) new AcquireTarget(robot);
 		
 		//Initialize the behavior of the robot
-		robot.changeBehavior(acquireTarget);
-		
-		//Setup the screen to start on button press
-		displayStartScreen();
+		//robot.changeBehavior(acquireTarget);
 
+		EV3ColorSensor colorSensor = new EV3ColorSensor(SensorPort.S1);
+		SensorMode colorIdMode = colorSensor.getColorIDMode();
+		colorSensor.setFloodlight(true);
+		float[] samples = new float[1];
+		
+		String[] testArray = new String[3];
+		testArray[0] = "test0";
+		testArray[1] = "test1";
+		testArray[2] = "test2";
+		
 		//Main loop of program
 		while(executeProgram || !Button.ESCAPE.isDown()) {
-			robot.runBehavior();
+			//robot.runBehavior();
+			System.gc();
+			colorIdMode.fetchSample(samples, 0);
+			
+			Robot.say(testArray);
+			
+			//Robot.say("" + samples[0]);
 		}
 	
 		displayEndScreen();
@@ -63,107 +82,5 @@ public class Main {
 		Button.LEDPattern(2);
 		Sound.beepSequence();
 		Button.waitForAnyPress();
-	}
-	
-	private void holdsAllOurStupidShit() {
-		while(true) {
-			int delay = 350;
-			Robot bot = new Robot();
-
-			
-			
-			Mat circles = new Mat();
-			
-			
-
-			while(circles.empty()) {
-
-				bot.rotateLeft(delay);
-				for (int i = 0; i < 4; i++) {
-					System.gc();
-					circles = bot.getCircles();
-					if(!circles.empty()) {
-						double[] circle = circles.get(0, 0);
-						
-						Robot.say("C:" + circles.cols() + "F:" + (i + 1) + "X:" + circle[0]);
-						//center here
-						
-					
-						
-						while(circle[0] < 310 || circle[0] > 330) {
-							if(circle[0] < 310) {
-								Robot.say("Rotate Left");
-								bot.rotateLeft((int)(320 - circle[0]));
-								Robot.say("C:" + circles.cols() + "F:" + (i + 1) + "X:" + circle[0]);
-							} else if(circle[0] > 330) {
-								Robot.say("Rotate Right");
-								bot.rotateRight((int)(circle[0] - 320));
-								Robot.say("C:" + circles.cols() + "F:" + (i + 1) + "X:" + circle[0]);
-							}
-							for (int j = 0; j < 4; j++) {
-								circles = bot.getCircles();
-								if(!circles.empty()) {
-									Robot.say("Break");
-									break;
-								}
-								
-							}
-							
-						}
-
-						
-						//center here
-					} else {
-						Robot.say(new String[] {"Frame: " + (i + 1)} );
-					}
-				}
-			}
-			
-			
-			
-			/*for (int i = 0; i < 4; i++) {
-				System.gc();
-				circles = shooterBot.getCircles();
-				
-				if(!circles.empty()) {
-					Robot.say("C: " + circles.cols() + "F: " + (i + 1));
-					//shooterBot.Beep();
-					
-					//shooterBot.fire();
-					break;
-				} else {
-					Robot.say(new String[] {"Frame: " + (i + 1)} );
-				}
-			}*/
-			
-			while(bot.findRangeToObject() == Float.POSITIVE_INFINITY) {
-				bot.moveForward();
-				Robot.say(Float.toString(bot.findRangeToObject()));
-				
-			}
-			bot.halt();
-			bot.fire();
-
-			//shooterBot.rotateLeft(350);
-			
-		}
-		
-		/*Robot.Debug("Circles: " + circles.cols());
-		//New camera sensor code********************************************
-		//Mat circles = shooterBot.getCircles();
-		//shooterBot.say("" + circles.cols());
-		
-		if(circles.empty()) {
-			aquireTarget.aquire();
-			do {
-				circles = shooterBot.getCircles();
-			}while(circles.empty());
-			aquireTarget.aquired();
-		}
-		
-		
-		Button.LEDPattern(2);
-		Sound.beepSequence();
-		Button.waitForAnyPress();*/
 	}
 }

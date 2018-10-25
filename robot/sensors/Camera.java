@@ -68,7 +68,7 @@ public class Camera {
 		capture = new VideoCapture();
 		cameraActive = false;
 		cameraId = -1;
-		cameraCycles = 4;
+		cameraCycles = 2;
 		lower_red_hue_range = new Mat();
 		upper_red_hue_range = new Mat();
 		red_hue_image = new Mat();
@@ -83,7 +83,7 @@ public class Camera {
 	public Mat getCircles() {
 		//Check the camera four times
 		for(int i = 0; i < cameraCycles; i++) {
-			
+			printCircles(i);
 			//Start the camera
 			startAcquisition();
 			
@@ -98,7 +98,10 @@ public class Camera {
 					if (!rawCameraImage.empty()) {
 						processImage(rawCameraImage);
 						printCircles(i);
-						break;
+						if(!circleContainer.empty()) {
+							stopAcquisition();
+							break;
+						}	
 					} else {
 						Robot.debug("Camera could not be open");
 					}
@@ -108,11 +111,9 @@ public class Camera {
 					System.err.println("Exception during the image elaboration: " + e);
 				}
 			}
-			
 			//Stop the camera
 			stopAcquisition();
 		}
-		
 		//Release the matrices
 		realeaseAllMats();
 		
@@ -138,7 +139,8 @@ public class Camera {
 		//Combine two images and blur to avoid false positives
 		Core.addWeighted(lower_red_hue_range, 1.0, upper_red_hue_range, 1.0, 0.0, red_hue_image);
 		Imgproc.GaussianBlur(red_hue_image, red_hue_image, new Size(9, 9), 2, 2);
-			
+		
+		minDist  = red_hue_image.rows();
 		//Detect circles on new image
 		Imgproc.HoughCircles(red_hue_image, circleContainer, Imgproc.CV_HOUGH_GRADIENT, dp, minDist, param1, param2, minRadius, maxRadius);
 	}

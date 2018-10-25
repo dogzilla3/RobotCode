@@ -1,6 +1,7 @@
 package shooterbot.robot.turret;
 
 import lejos.hardware.port.MotorPort;
+import lejos.utility.Delay;
 
 /*
  *  Turret controller controls the firing mechanism
@@ -27,6 +28,7 @@ public class TurretController {
 			turretMotor.rotate(-95);
 			ammo--;
 			turretMotor.rotate(95);
+			Delay.msDelay(1000);
 		}
 	}
 	
