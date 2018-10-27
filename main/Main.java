@@ -53,10 +53,9 @@ public class Main {
 			colorIdMode.fetchSample(samples, 0);
 			
 			Robot.say(testArray);
-			
+			robot.moveForward();
 			//Robot.say("" + samples[0]);
 		}
-	
 		displayEndScreen();
 	}
 		
