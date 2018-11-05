@@ -9,54 +9,125 @@ import org.opencv.core.Point;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.UnregulatedMotor;
+import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.SensorPort;
 import lejos.ev3.tools.EV3Console;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
+import lejos.robotics.Color;
+import lejos.robotics.SampleProvider;
 import shooterbot.behaviors.*;
 import shooterbot.robot.Robot;
 
 public class Main {
-	
+    static UnregulatedMotor motorA = new UnregulatedMotor(MotorPort.A);
+    static UnregulatedMotor motorB = new UnregulatedMotor(MotorPort.B);
+    static EV3ColorSensor        color = new EV3ColorSensor(SensorPort.S1);
+    
 	public static boolean executeProgram = true;
 	
 	public static void main(String[] args) {
-		////This line has to be the first line in the program!!!////
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+//		////This line has to be the first line in the program!!!////
+//		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+//		
+//		//Setup the screen to start on button press
+//		displayStartScreen();
+//		
+//		//Initialize the robot
+//		Robot robot = new Robot();
+//		
+//		//Initialize the start behavior 
+//		Behavior colorTest = (Behavior) new ColorTest(robot);
+//		
+//		//Initialize the behavior of the robot
+//		robot.changeBehavior(colorTest);
+//
+//		//Main loop of program
+//		while(executeProgram || !Button.ESCAPE.isDown()) {
+//			robot.runBehavior();
+//			System.gc();
+//		}
+//		displayEndScreen();
 		
-		//Setup the screen to start on button press
-		displayStartScreen();
-		
-		//Initialize the robot
-		Robot robot = new Robot();
-		
-		//Initialize the start behavior 
-		//Behavior acquireTarget = (Behavior) new AcquireTarget(robot);
-		
-		//Initialize the behavior of the robot
-		//robot.changeBehavior(acquireTarget);
+		SampleProvider    colorValue;
+        float[] lineSample = new float[3];
+        float[] colorSample = new float[3];
+        System.out.println("Line Follower\n");
+        
+        color.getRedMode();
+        color.setFloodlight(Color.RED);
+        color.setFloodlight(true);
 
-		EV3ColorSensor colorSensor = new EV3ColorSensor(SensorPort.S1);
-		SensorMode colorIdMode = colorSensor.getColorIDMode();
-		colorSensor.setFloodlight(true);
-		float[] samples = new float[1];
-		
-		String[] testArray = new String[3];
-		testArray[0] = "test0";
-		testArray[1] = "test1";
-		testArray[2] = "test2";
-		
-		//Main loop of program
-		while(executeProgram || !Button.ESCAPE.isDown()) {
-			//robot.runBehavior();
-			System.gc();
-			colorIdMode.fetchSample(samples, 0);
-			
-			Robot.say(testArray);
-			robot.moveForward();
-			//Robot.say("" + samples[0]);
-		}
-		displayEndScreen();
+        Button.LEDPattern(4);    // flash green led and 
+        Sound.beepSequenceUp();  // make sound when ready.
+
+        System.out.println("Press any key to start");
+        
+        Button.waitForAnyPress();
+        
+        motorA.setPower(40);
+        motorB.setPower(40);
+       
+        // drive waiting for touch sensor or escape key to stop driving.
+
+        boolean side = false;
+        while (Button.ESCAPE.isUp()) 
+        {
+            colorValue = color.getRGBMode();
+            colorValue.fetchSample(colorSample, 0);
+            color.setFloodlight(Color.WHITE);
+            color.setFloodlight(true);
+            Robot.say("R " + colorSample[0]);
+            Robot.say("G " + colorSample[1]);
+            Robot.say("B " + colorSample[2]);
+            
+            Robot.say("");
+            
+            motorA.setPower(50);
+            motorB.setPower(-50);
+            
+//            if(colorSample[0] < 0.06) {
+//            	colorValue = color.getRedMode();
+//                colorValue.fetchSample(lineSample, 0);
+//
+//                if (lineSample[0] > .100)
+//                {
+//                    motorA.setPower(50);
+//                    motorB.setPower(47);
+//                }
+//                else
+//                {
+//                    motorA.setPower(-50);    
+//                    motorB.setPower(50);
+//                }
+//                
+//                colorValue = color.getRGBMode();
+//                colorValue.fetchSample(lineSample, 0);
+//                color.setFloodlight(Color.WHITE);
+//                color.setFloodlight(true);
+//                Robot.say("R " + lineSample[0]);
+//                Robot.say("G " + lineSample[1]);
+//                Robot.say("B " + lineSample[2]);
+//                
+//                Robot.say("");
+//            }
+//            else {
+//            	motorA.setPower(100);
+//                motorB.setPower(-100);
+//            }
+        }
+       
+        // stop motors with brakes on.
+        motorA.stop();
+        motorB.stop();
+
+        // free up resources.
+        motorA.close();
+        motorB.close();
+        color.close();
+       
+        Sound.beepSequence(); // we are done.
 	}
 		
 	/*

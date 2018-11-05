@@ -8,7 +8,6 @@ import lejos.robotics.SampleProvider;
 
 public class UltrasonicSensor implements RangeFinder{
 	
-	EV3ColorSensor colorSensor;
 	NXTUltrasonicSensor sensor;
 	SampleProvider sampleProvider;
 	float[] sample;

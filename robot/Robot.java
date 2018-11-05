@@ -10,6 +10,7 @@ import lejos.hardware.Sound;
 import shooterbot.behaviors.Behavior;
 import shooterbot.robot.locomotion.MotorController;
 import shooterbot.robot.sensors.Camera;
+import shooterbot.robot.sensors.ColorSensor;
 import shooterbot.robot.sensors.UltrasonicSensor;
 import shooterbot.robot.turret.TurretController;
 import java.io.File;
@@ -43,7 +44,10 @@ public class Robot {
 	private TurretController turretController;
 	
 	//The Ultrasonic sensor
-	private EV3ColorSensor ultrasonicSensor;
+	private UltrasonicSensor ultrasonicSensor;
+	
+	//The Ultrasonic sensor
+	private ColorSensor colorSensor;
 	
 	//A reference to the current behavior
 	private Behavior behavior;
@@ -75,6 +79,7 @@ public class Robot {
 	 */
 	public Robot(){
 		this.motorController = new MotorController();
+		this.colorSensor = new ColorSensor(SensorPort.S1);
 		//this.ultrasonicSensor = new EV3ColorSensor(SensorPort.S1);
 		//this.turretController = new TurretController(); 
 		this.camera = new Camera();
@@ -128,7 +133,6 @@ public class Robot {
 	
 	public static void say(String message) {
 		System.out.println(message);
-		clearDisplay(7);
 	}
 	
 	public static void say(String[] messages) {
@@ -185,6 +189,9 @@ public class Robot {
 		}
 	}
 	
+	public float[] getColor() {
+		return colorSensor.getColor();
+	}
 	public Mat getCircles() {
 		return camera.getCircles();
 	}
