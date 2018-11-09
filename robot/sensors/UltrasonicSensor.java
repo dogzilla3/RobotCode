@@ -1,50 +1,52 @@
 package shooterbot.robot.sensors;
 
 import lejos.hardware.port.Port;
-import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.NXTUltrasonicSensor;
 import lejos.robotics.RangeFinder;
 import lejos.robotics.SampleProvider;
+import lejos.utility.Delay;
 
 public class UltrasonicSensor implements RangeFinder{
 	
 	NXTUltrasonicSensor sensor;
-	SampleProvider sampleProvider;
-	float[] sample;
+	SampleProvider rangeProvider;
+	float[] range;
 	
 	public UltrasonicSensor(Port port) {
 		sensor = new NXTUltrasonicSensor(port);
-		sampleProvider = sensor.getDistanceMode();
-		sample = new float[3];
-	}
-
-	@Override
-	public float getRange() {
-		sampleProvider.fetchSample(sample, 0);
-		sampleProvider.fetchSample(sample, 1);
-		sampleProvider.fetchSample(sample, 2);
-		return (sample[0] + sample[1] + sample[2]) / 3;
-	}
-
-	@Override
-	public float[] getRanges() {
-		sampleProvider.fetchSample(sample, 0);
-		return sample;
-	}
-
-	public boolean isEnabled() {
-		return sensor.isEnabled();
-	}
-	
-	public void enable() {
-		sensor.enable();
-	}
-	
-	public void disable() {
-		sensor.disable();
+		rangeProvider = sensor.getDistanceMode();
+		range = new float[5];
 	}
 	
 	public void close() {
 		sensor.close();
+	}
+
+	@Override
+	public float getRange() {
+		rangeProvider.fetchSample(range, 0);
+		Delay.msDelay(40);
+		rangeProvider.fetchSample(range, 1);
+		Delay.msDelay(40);
+		rangeProvider.fetchSample(range, 2);
+		Delay.msDelay(40);
+		rangeProvider.fetchSample(range, 3);
+		Delay.msDelay(40);
+		rangeProvider.fetchSample(range, 4);
+		Delay.msDelay(40);
+		
+		float sum = 0;
+		
+		for(int i = 0; i < 5; i++) {
+			sum += range[i];
+		}
+		
+		return (sum / 5);
+	}
+
+	@Override
+	public float[] getRanges() {
+		rangeProvider.fetchSample(range, 0);
+		return range;
 	}
 }

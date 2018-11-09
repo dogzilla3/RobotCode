@@ -2,90 +2,54 @@ package shooterbot.robot;
 
 
 import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.BaseRegulatedMotor;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.SensorPort;
-import lejos.hardware.sensor.EV3ColorSensor;
-import lejos.utility.Delay;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import shooterbot.behaviors.Behavior;
-import shooterbot.robot.locomotion.MotorController;
-import shooterbot.robot.sensors.Camera;
 import shooterbot.robot.sensors.ColorSensor;
+import shooterbot.robot.sensors.IRSensor;
 import shooterbot.robot.sensors.UltrasonicSensor;
-import shooterbot.robot.turret.TurretController;
 import java.io.File;
-import org.opencv.core.Mat;
 
 
 public class Robot {
+
 	
-	/*
-	 * Motor ports: left drive 	A
-	 * 				right drive B
-	 * 				turret 		C
-	 * 
-	 * Sensor ports: Ultrasonic 1
-	 */
+	private EV3LargeRegulatedMotor leftDriveMotor;
+	private EV3LargeRegulatedMotor rightDriveMotor;	
+	private final float DEFAULT_SPEED = 200f;
 	
-	
-	/* TODO:
-	 * We may be able to open a new thread to run behaviors.
-	 * This would allow us to run concurrent behaviors, ie
-	 * move the robot and use the sensor, shoot the turret.
-	 */
-	
-	/* 
-	 * Controls the motors, need to hide the two different 
-	 * motors and control them both through this
-	 */
-	private MotorController motorController;
-	
-	//Controls the turret
-	private TurretController turretController;
-	
-	//The Ultrasonic sensor
-	private UltrasonicSensor ultrasonicSensor;
-	
-	//The Ultrasonic sensor
+	private UltrasonicSensor leftWallSensor;
+	private UltrasonicSensor rightWallSensor;
+	private IRSensor frontWallSensor;
 	private ColorSensor colorSensor;
 	
-	//A reference to the current behavior
 	private Behavior behavior;
-	
-	//A reference to camera
-	private Camera camera;
+
 	private static File searchingSound = new File("zSearching.wav");
-	private static File centeringSound = new File("zCentering.wav");
-	private static File approachingSound = new File("zApproaching.wav");
-	private static File engagingSound = new File("zEngaging.wav");
+
+	public static enum Sounds{ UP, DOWN; }
+	public static enum Wav{ SEARCHING, CENTERING, APPROACHING, ENGAGING; }
+	public static enum Orientation{ NORTH, SOUTH, EAST, WEST; }
 	
-	public static enum Sounds{
-		UP,
-		DOWN;
-	}
+	public Orientation currentOrientation;
 	
-	public static enum Wav{
-		SEARCHING,
-		CENTERING,
-		APPROACHING,
-		ENGAGING;
-	}
-	/* 
-	 * The robot constructor sets up the parts of our robot
-	 * - Motor Controller
-	 * - Turret Controller
-	 * - Ultrasonic sensor
-	 * - Camera
-	 */
 	public Robot(){
-		this.motorController = new MotorController();
 		this.colorSensor = new ColorSensor(SensorPort.S1);
-		//this.ultrasonicSensor = new EV3ColorSensor(SensorPort.S1);
-		//this.turretController = new TurretController(); 
-		this.camera = new Camera();
+		this.leftWallSensor = new UltrasonicSensor(SensorPort.S3);
+		this.rightWallSensor = new UltrasonicSensor(SensorPort.S4);
+		//this.frontWallSensor = new IRSensor(SensorPort.S4);
+		leftDriveMotor = new EV3LargeRegulatedMotor(MotorPort.A);
+		rightDriveMotor = new EV3LargeRegulatedMotor(MotorPort.B);
+		BaseRegulatedMotor[] array = {rightDriveMotor};
+		leftDriveMotor.synchronizeWith(array);
+		leftDriveMotor.setSpeed(200f);
+		rightDriveMotor.setSpeed(200f);
+		currentOrientation = Orientation.NORTH;
 	}
-	
-	
 	
 	public void runBehavior() {
 		if(behavior != null) {
@@ -99,51 +63,9 @@ public class Robot {
 		this.behavior = newBehavior;
 	}
 	
-	public void moveForward() {
-		motorController.forward();
-	}
-	
-	public void moveBackward() {
-		motorController.backward();
-	}
-	
-	public void halt() {
-		motorController.halt();
-	}
-	
-	public void rotateLeft() {
-		motorController.rotateLeft();
-	}
-	
-	public void rotateRight() {
-		motorController.rotateRight();
-	}
-	
-	public void rotateLeft(int delay) {
-		motorController.rotateLeft();
-		Delay.msDelay(delay);
-		motorController.halt();
-	}
-	
-	public void rotateRight(int delay) {
-		motorController.rotateRight();
-		Delay.msDelay(delay);
-		motorController.halt();
-	}
-	
 	public static void say(String message) {
 		System.out.println(message);
 	}
-	
-	public static void say(String[] messages) {
-		for (int i=0; i < messages.length; i++) { 
-			System.out.println("- " + messages[i]);
-		}
-		if(8 - messages.length > 0) {
-			clearDisplay(8 - messages.length);
-		}
-	}
-
 	
 	public void beep(Sounds sound) {
         switch (sound) { 
@@ -157,20 +79,85 @@ public class Robot {
 		Sound.beep();
 	}
 	
-	public float findRangeToObject() {
-		return 1f;
+	public float getLeftWallDistance() {
+		return leftWallSensor.getRange();
 	}
 	
 	
-	public float[] findMultipleRanges() {
-		return new float[3];
+	public float getRightWallDistance() {
+		return rightWallSensor.getRange();
 	}
 	
-	public void fire() {
-		turretController.fire();
+	public float getFrontWallDistance() {
+		//THis needs to change
+		return 0f;
 	}
 	
-	public static void debug(String message) {
+	public float[] getColorSample() {
+		return colorSensor.getColorSample();
+	}
+	
+	public int getColorId() {
+		return colorSensor.getColor();
+	}
+	
+	public void halt() {
+		leftDriveMotor.startSynchronization();
+		leftDriveMotor.stop(true);
+		rightDriveMotor.stop(true);
+		leftDriveMotor.endSynchronization();
+	}
+	
+	public void turnLeft() {
+		leftDriveMotor.startSynchronization();
+		leftDriveMotor.backward();
+		rightDriveMotor.forward();
+		leftDriveMotor.endSynchronization();
+	}
+	
+	public void turnRight() {
+		leftDriveMotor.startSynchronization();
+		leftDriveMotor.forward();
+		rightDriveMotor.backward();
+		leftDriveMotor.endSynchronization();
+	}
+	
+	public void forward() {
+		leftDriveMotor.startSynchronization();
+		leftDriveMotor.forward();
+		rightDriveMotor.forward();
+		leftDriveMotor.endSynchronization();
+	}
+	
+	public void backward() {
+		leftDriveMotor.startSynchronization();
+		leftDriveMotor.backward();
+		rightDriveMotor.backward();
+		leftDriveMotor.endSynchronization();
+	}
+	
+	public void setLeftMotorSpeed(float leftSpeed) {
+		leftDriveMotor.setSpeed(leftSpeed);
+	}
+	
+	public void setRightMotorSpeed(float rightSpeed) {
+		rightDriveMotor.setSpeed(rightSpeed);
+	}
+	
+	public void leftReverse() {
+		leftDriveMotor.backward();
+	}
+	
+	public void rightReverse() {
+		rightDriveMotor.backward();
+	}
+	
+	public void resetSpeed() {
+		leftDriveMotor.setSpeed(DEFAULT_SPEED);
+		rightDriveMotor.setSpeed(DEFAULT_SPEED);
+	}
+	
+	public static void debugPause(String message) {
 		LCD.clearDisplay();
 		Sound.beep();
 		say(message);
@@ -181,23 +168,12 @@ public class Robot {
 	
 	public static void playSound(Wav wav) {
 		switch(wav) {
-			case SEARCHING: Sound.playSample(searchingSound, Sound.VOL_MAX); break; 
-	        case CENTERING: Sound.playSample(centeringSound, Sound.VOL_MAX); break; 
-			case APPROACHING: Sound.playSample(approachingSound, Sound.VOL_MAX); break; 
-	        case ENGAGING: Sound.playSample(engagingSound, Sound.VOL_MAX); break; 
+//			case SEARCHING: Sound.playSample(searchingSound, Sound.VOL_MAX); break; 
+//	        case CENTERING: Sound.playSample(centeringSound, Sound.VOL_MAX); break; 
+//			case APPROACHING: Sound.playSample(approachingSound, Sound.VOL_MAX); break; 
+//	        case ENGAGING: Sound.playSample(engagingSound, Sound.VOL_MAX); break; 
 	        default: Sound.beep(); break; 
 		}
-	}
-	
-	public float[] getColor() {
-		return colorSensor.getColor();
-	}
-	public Mat getCircles() {
-		return camera.getCircles();
-	}
-	
-	public int getAmmo() {
-		return turretController.getAmmo();
 	}
 	
 	public static void clearDisplay(int lines) {
